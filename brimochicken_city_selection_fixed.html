@@ -2166,58 +2166,6 @@ body{
   max-width:1120px;
   padding:clamp(32px,5vw,64px) 0 100px;
 }
-.menu-cover{
-  position:relative;
-  height:clamp(280px,38vw,460px);
-  margin-bottom:34px;
-  overflow:hidden;
-  border-radius:30px;
-  background:#2a241f;
-  border:1px solid rgba(255,255,255,.32);
-  box-shadow:0 24px 58px rgba(35,26,18,.2);
-  isolation:isolate;
-}
-.menu-cover::after{
-  content:"";
-  position:absolute;
-  inset:0;
-  z-index:1;
-  background:linear-gradient(180deg,rgba(0,0,0,.02) 20%,rgba(0,0,0,.18) 48%,rgba(0,0,0,.82) 100%);
-}
-.menu-cover img{
-  width:100%;
-  height:100%;
-  display:block;
-  object-fit:cover;
-  transform:scale(calc(1.03 + var(--cover-scroll, 0) * .04));
-  filter:blur(calc(var(--cover-scroll, 0) * 3px)) saturate(.96);
-  opacity:calc(1 - var(--cover-scroll, 0) * .22);
-  transition:filter .2s ease, opacity .2s ease;
-}
-.menu-cover__content{
-  position:absolute;
-  z-index:2;
-  left:32px;
-  right:32px;
-  bottom:30px;
-  color:#fff;
-  transform:translateY(calc(var(--cover-scroll, 0) * -8px));
-  transition:transform .2s ease;
-}
-.menu-cover__title{
-  font-family:var(--font-display);
-  font-size:clamp(2.8rem,7vw,5.8rem);
-  line-height:.95;
-  text-shadow:0 3px 18px rgba(0,0,0,.4);
-}
-.menu-cover__sub{
-  display:block;
-  margin-top:8px;
-  font-size:.75rem;
-  letter-spacing:.08em;
-  text-transform:uppercase;
-  opacity:.88;
-}
 .section-heading{
   margin:36px 0 22px;
   padding:0 0 16px;
@@ -2305,8 +2253,6 @@ body{
   .cat-card__label{padding:22px;font-size:clamp(2rem,9vw,3rem)}
   .cat-card__label::after{width:38px;height:38px;flex-basis:38px}
   .menu-inner{padding-top:30px}
-  .menu-cover{height:280px;border-radius:22px;margin-bottom:24px}
-  .menu-cover__content{left:20px;right:20px;bottom:22px}
   .menu-card{min-height:0;padding:12px;gap:14px;border-radius:20px}
   .menu-card__media{width:116px;height:116px;min-width:116px;border-radius:15px}
   .menu-card__body{padding:3px 4px 3px 0}
@@ -2520,6 +2466,10 @@ body{
 }
 #view-categories.hidden {
   display: block;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
   opacity: 0;
   visibility: hidden;
   pointer-events: none;
@@ -4039,15 +3989,6 @@ const categoryImages = {
       document.body.style.overflow = "";
     }
 
-    function updateMenuCover() {
-      const cover = document.querySelector(".menu-cover");
-      if (!cover) return;
-      const progress = Math.min(Math.max(window.scrollY / 260, 0), 1);
-      cover.style.setProperty("--cover-scroll", progress.toFixed(3));
-    }
-
-    window.addEventListener("scroll", updateMenuCover, { passive: true });
-
     function renderMenu(id) {
       const data = menuData[id];
       const inner = document.getElementById("menu-inner");
@@ -4060,22 +4001,11 @@ const categoryImages = {
         ? `<span class="section-heading__sub">${esc(dataSubtitle)}</span>`
         : "";
 
-      const cover = categoryPreview
-        ? `<div class="menu-cover" style="--cover-scroll:0">
-            <img src="${esc(categoryPreview)}" alt="${esc(dataTitle)}" loading="eager" decoding="async" />
-            <div class="menu-cover__content">
-              <div class="menu-cover__title">${esc(dataTitle)}</div>
-              ${sub ? `<span class="menu-cover__sub">${sub.replace('<span class="section-heading__sub">', '').replace('</span>', '')}</span>` : ""}
-            </div>
-          </div>`
-        : "";
-
-      html += cover;
       html += `<div class="section-heading">
-          <span class="section-heading__emoji">${data.emoji}</span>
-          <span class="section-heading__title">${esc(dataTitle)}</span>
-          ${sub}
-        </div>`;
+        <span class="section-heading__emoji">${data.emoji}</span>
+        <span class="section-heading__title">${esc(dataTitle)}</span>
+        ${sub}
+      </div>`;
 
       if (data.items && data.items.length) {
         const itemsWithPreview = data.items.map((item) => ({
@@ -4140,7 +4070,6 @@ const categoryImages = {
       }
 
       inner.innerHTML = html;
-      updateMenuCover();
       inner.querySelectorAll(".menu-card__preview-btn, .menu-card__media[data-preview-src]").forEach((btn) => {
         btn.addEventListener("click", () => {
           openImageModal(btn.dataset.previewSrc, btn.dataset.previewTitle);
